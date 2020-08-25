@@ -1,6 +1,0 @@
-packages: ArgParse
-sysimage_base: vscode (/home/belmant/.julia/sysimages/vscode/sysimage.so)
-created_on: 2020-08-21T16:53:00.49
-execution_file: String[]
-precompile_statements_file = /home/belmant/.julia/sysimages/mediacli/precompile_statements.jl
-command: create_sysimage([:ArgParse]; replace_default = false, sysimage_path = "/home/belmant/.julia/sysimages/mediacli/sysimage.so", incremental = true, base_sysimage = "/home/belmant/.julia/sysimages/vscode/sysimage.so", precompile_execution_file = String[], precompile_statements_file = "mediacli/precompile_statements.jl")
