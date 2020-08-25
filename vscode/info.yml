@@ -1,0 +1,5 @@
+packages: Revise, OhMyREPL
+sysimage_base: default (/home/belmant/julia-1.5.0/lib/julia/sys.so)
+created_on: 2020-08-21T16:45:57.355
+code_file: String[]
+command: create_sysimage([:Revise, :OhMyREPL]; replace_default = false, sysimage_path = "/home/belmant/.julia/sysimages/vscode/sysimage.so", incremental = true, base_sysimage = "/home/belmant/julia-1.5.0/lib/julia/sys.so", precompile_execution_file = String[], precompile_statements_file = String[])
