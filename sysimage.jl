@@ -149,7 +149,6 @@ function main()
 
     target_path = pathof(target_sysimg)
     target_dir = dirname(target_path)
-    mkpath(target_dir)
 
     if rebuild
         isnothing(env) || error("Rebuilding an image with an environment is not supported.")
@@ -188,6 +187,7 @@ function main()
 
     if !dry_run
         println(cmd)
+        mkpath(target_dir)
         eval(cmd)
         write(joinpath(target_dir, "info.yml"), execution_log)
     end
