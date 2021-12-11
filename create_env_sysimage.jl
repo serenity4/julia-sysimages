@@ -2,7 +2,6 @@
 Generate a system image for a VSCode environment. Intended use is as an alternative to the julia-vscode custom sysimage build system, running tests of the current project to generate precompilation statements.
 """
 
-using Base.Sys
 using PackageCompiler
 using Pkg
 
