@@ -124,6 +124,10 @@ function main()
         @arghelp "Comma-separated list of files containing code to be executed for triggering precompilation statements."
         @argumentoptional String _statement_files "-s" "--statements-file"
         @arghelp "Comma-separated list of files containing precompilation statements."
+        @argumentoptional String env "--env"
+        @arghelp "Build a system image for a custom environment, including all its dependencies (except dev'ed packages)."
+        @argumentoptional Symbol name "-n" "--name"
+        @arghelp "Name of the sysimage to be created."
         @argumentflag replace_default "-r" "--replace-default"
         @arghelp "Replace default system image after creation."
         @argumentflag dry_run "-d" "--dry-run"
@@ -134,10 +138,6 @@ function main()
         @arghelp "Rebuilds the sysimage located at <name>/JuliaSysimage.so based on its info.yml file."
         @argumentflag force "-f" "--force"
         @arghelp "Force creation of a system image even if one already exists."
-        @argumentoptional String env "--env"
-        @arghelp "Build a system image for a custom environment, including all its dependencies (except dev'ed packages)."
-        @argumentoptional Symbol name "-n" "--name"
-        @arghelp "Name of the sysimage to be created."
     end
 
     base_sysimage = isnothing(_base_sysimage) ? DefaultSysimage() : Sysimage(_base_sysimage)
@@ -174,7 +174,7 @@ function main()
     packages: $(join(string.(pkgs), ", "))
     sysimage_base: $(dirname(base_sysimage)) ($(pathof(base_sysimage)))
     execution_file: $(abspath.(execution_files))
-    precompile_statements_file = $(abspath.(statement_files))
+    precompile_statements_file: $(abspath.(statement_files))
     command: $cmd
     """
 
@@ -188,8 +188,13 @@ function main()
     if !dry_run
         println(cmd)
         mkpath(target_dir)
-        eval(cmd)
-        write(joinpath(target_dir, "info.yml"), execution_log)
+        if !isnothing(env)
+            Pkg.activate(env)
+            eval(cmd)
+        else
+            eval(cmd)
+            write(joinpath(target_dir, "info.yml"), execution_log)
+        end
     end
 end
 
