@@ -104,7 +104,6 @@ function main()
         sysimage -n test -p Test,ArgMacros             # a system image is incrementally built from the default one
         sysimage -n test2 -p Vulkan -b test            # will contain a system image with Test, ArgMacros and Vulkan
         sysimage -n test2 --rebuild                    # just rebuild the system image with the same parameters as before
-        sysimage -n test2 --rebuild -r                 # make it the default system image
         sysimage --env ~/.julia/dev/SPIRV
 """
         @helpdescription """
@@ -128,8 +127,6 @@ function main()
         @arghelp "Build a system image for a custom environment, including all its dependencies (except dev'ed packages)."
         @argumentoptional Symbol name "-n" "--name"
         @arghelp "Name of the sysimage to be created."
-        @argumentflag replace_default "-r" "--replace-default"
-        @arghelp "Replace default system image after creation."
         @argumentflag dry_run "-d" "--dry-run"
         @arghelp "Run without creating the system image."
         @argumentflag no_confirm "-n" "--no-confirm"
@@ -161,7 +158,6 @@ function main()
     cmd = :(
         create_sysimage(
             $(packages(target_sysimg));
-            replace_default=$replace_default,
             sysimage_path=$target_path,
             incremental=true,
             base_sysimage=$(pathof(base_sysimage)),
