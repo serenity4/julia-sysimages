@@ -43,6 +43,7 @@ basedir(img::Sysimage) = @something(img.env, joinpath(homedir(), ".julia", "sysi
 
 Base.pathof(img::DefaultSysimage) = abspath(joinpath(dirname(Sys.BINDIR), "lib", "julia", "sys.so"))
 Base.pathof(img::Sysimage) = joinpath(basedir(img), "JuliaSysimage.so")
+backup_path(img::DefaultSysimage) = joinpath(dirname(pathof(img)), "old.sys.so")
 
 check_existing(img::Sysimage, force::Bool) = begin
     path = pathof(img)
@@ -135,13 +136,25 @@ function main()
         @arghelp "Rebuilds the sysimage located at <name>/JuliaSysimage.so based on its info.yml file."
         @argumentflag force "-f" "--force"
         @arghelp "Force creation of a system image even if one already exists."
+        @argumentflag replace_default "--replace-default"
+        @arghelp "Replace the default system image, backing the previous one up."
+        @argumentflag restore_default "--restore-default"
+        @arghelp "Restore the default system image Julia shipped with. The current default system image will be erased."
     end
 
+    replace_default ⊻ restore_default || error("Cannot both replace and restore the default system image. Please select only one of these options.")
+    if restore_default
+        default = DefaultSysimage()
+        isfile(backup_path(default)) || error("The default system image was not backed up. The current default system image should already be the original one, unless you modified it manually.")
+        @info "Restoring original system image."
+        !dry_run && mv(backup_path(default), pathof(default))
+        return
+    end
     base_sysimage = isnothing(_base_sysimage) ? DefaultSysimage() : Sysimage(_base_sysimage)
     pkgs = Symbol.(listargs(_pkgs))
     execution_files = listargs(_execution_files)
     statement_files = listargs(_statement_files)
-    name = something(name, Symbol(basename(tempname())))
+    name = something(name, :unnamed)
     target_sysimg = Sysimage(name, env, pkgs)
 
     target_path = pathof(target_sysimg)
@@ -190,6 +203,15 @@ function main()
         else
             eval(cmd)
             write(joinpath(target_dir, "info.yml"), execution_log)
+        end
+    end
+
+    if replace_default
+        default = DefaultSysimage()
+        @info "Replacing default system image."
+        if !dry_run
+            mv(pathof(default), backup_path(default))
+            mv(pathof(target_sysimg), pathof(default))
         end
     end
 end
